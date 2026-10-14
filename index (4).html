@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hifz – Quran auswendig lernen</title>
+<meta name="theme-color" content="#1B4D3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Amiri:wght@400;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+:root{--bg:#FBF8F1;--bg2:#F4EEDD;--ink:#2B2523;--hen:#C85A32;--em:#1B4D3E;--gold:#D4AF37;--line:#d9ccaa;--hl:#C85A32;--card:rgba(244,238,221,.9);
+--star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cg fill='none' stroke='%23D4AF37' stroke-width='1.2'%3E%3Crect x='10' y='10' width='20' height='20'/%3E%3Crect x='10' y='10' width='20' height='20' transform='rotate(45 20 20)'/%3E%3C/g%3E%3C/svg%3E")}
+.dark{--bg:#1A1612;--bg2:#241E17;--ink:#EDE3CF;--line:#4a3d2b;--hl:#E8895F;--card:rgba(36,30,23,.9)}
+body{background:var(--bg);color:var(--ink);font-family:Amiri,serif;font-size:18px}
+#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(rgba(251,248,241,.15),rgba(251,248,241,.15)),url(bg.jpg) center bottom/cover no-repeat}.dark #bg{background:linear-gradient(rgba(26,22,18,.82),rgba(26,22,18,.82)),url(bg.jpg) center bottom/cover no-repeat}
+h1,h2,.cz{font-family:Cinzel,serif;letter-spacing:.1em}
+.ar{font-family:'Noto Naskh Arabic','Amiri',serif;line-height:2.2}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 0 var(--line)}
+.arch{border-radius:999px 999px 14px 14px/120px 120px 14px 14px;border:2px solid var(--gold);outline:1px solid var(--line);outline-offset:4px}
+.orn{height:18px;background:var(--star) repeat-x center/18px;opacity:.8;margin:2px 0}
+.btn{border:1px solid var(--gold);border-radius:10px;padding:.4rem .9rem;background:var(--bg);color:var(--ink)}
+.btn:disabled{opacity:.4}.btn.p,.tab.on{background:var(--em);color:#FBF8F1}.btn.h{background:var(--hen);color:#fff}
+.w{display:inline-block;margin:0 .3rem;transition:opacity .3s;cursor:pointer}
+.w b{display:block;font-weight:400;font-size:2rem;transition:filter .35s}
+.w.bl b{filter:blur(9px);user-select:none}
+.w small{display:block;text-align:center;font-size:.85rem;line-height:1.2;opacity:.85;transition:filter .35s,color .2s}.w.bl small{filter:blur(6px)}.w small.on{color:var(--hl);opacity:1}
+.L{font-style:normal;transition:color .18s}.L.on{color:var(--hl)}
+input[type=range]{accent-color:var(--em);width:100%}select{background:var(--bg);border:1px solid var(--gold);border-radius:8px;padding:.1rem .3rem}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="app" class="max-w-2xl mx-auto px-4 pb-16"></div>
+<script>
+const $=q=>document.querySelector(q);
+/* ===== Suren-Metadaten (Texte werden pro Sure geladen und vom Service Worker gecacht) ===== */
+const CNT=[7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
+const N="Al-Fatiha,Al-Baqara,Al-Imran,An-Nisa,Al-Maida,Al-Anam,Al-Araf,Al-Anfal,At-Tawba,Yunus,Hud,Yusuf,Ar-Rad,Ibrahim,Al-Hijr,An-Nahl,Al-Isra,Al-Kahf,Maryam,Ta-Ha,Al-Anbiya,Al-Hajj,Al-Muminun,An-Nur,Al-Furqan,Asch-Schuara,An-Naml,Al-Qasas,Al-Ankabut,Ar-Rum,Luqman,As-Sajda,Al-Ahzab,Saba,Fatir,Ya-Sin,As-Saffat,Sad,Az-Zumar,Ghafir,Fussilat,Asch-Schura,Az-Zukhruf,Ad-Dukhan,Al-Jathiya,Al-Ahqaf,Muhammad,Al-Fath,Al-Hujurat,Qaf,Adh-Dhariyat,At-Tur,An-Najm,Al-Qamar,Ar-Rahman,Al-Waqia,Al-Hadid,Al-Mujadila,Al-Haschr,Al-Mumtahana,As-Saff,Al-Jumua,Al-Munafiqun,At-Taghabun,At-Talaq,At-Tahrim,Al-Mulk,Al-Qalam,Al-Haqqa,Al-Maarij,Nuh,Al-Dschinn,Al-Muzzammil,Al-Muddaththir,Al-Qiyama,Al-Insan,Al-Mursalat,An-Naba,An-Naziat,Abasa,At-Takwir,Al-Infitar,Al-Mutaffifin,Al-Inschiqaq,Al-Buruj,At-Tariq,Al-Ala,Al-Ghaschiya,Al-Fajr,Al-Balad,Asch-Schams,Al-Layl,Ad-Duha,Asch-Scharh,At-Tin,Al-Alaq,Al-Qadr,Al-Bayyina,Az-Zalzala,Al-Adiyat,Al-Qaria,At-Takathur,Al-Asr,Al-Humaza,Al-Fil,Quraysch,Al-Maun,Al-Kawthar,Al-Kafirun,An-Nasr,Al-Masad,Al-Ikhlas,Al-Falaq,An-Nas".split(',');
+/* ===== Zustand ===== */
+let db;try{db=JSON.parse(localStorage.getItem('hifz.v1'))}catch(e){}
+db=db||{cards:{},cur:{s:1,a:1},log:{}};db.cards=db.cards||{};db.log=db.log||{};db.cur=db.cur||{s:1,a:1};
+db.cfg={rep:3,pause:1,rate:1,hp:1,tr:1,tw:1,dark:0,rid:7,...db.cfg};
+const save=()=>{try{localStorage.setItem('hifz.v1',JSON.stringify(db))}catch(e){}};
+let u={view:'home',mode:'loop',blur:40,rv:new Set(),q:[],i:0,rev:0,sel:0},L={on:0},au,lit=0,gen=0,T={},WN=[],WT=[],AC={},RC=[{id:7,n:'Mishari al-Afasy (Murattal)'},{id:1,n:'AbdulBaset AbdulSamad (Mujawwad)'}];
+try{RC=JSON.parse(localStorage.getItem('hifz.rc'))||RC}catch(e){}
+/* ===== Text laden: einfache Schrift (quran-simple), Bubenheim, Transliteration ===== */
+const MK=/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g,ONLYMK=/^[\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]+$/;
+async function load(s){if(T[s])return 1;try{
+ const j=await(await fetch(`https://api.alquran.cloud/v1/surah/${s}/editions/quran-simple,de.bubenheim,en.transliteration`)).json(),
+ g=id=>j.data.find(e=>e.edition.identifier==id).ayahs.map(y=>y.text);
+ T[s]={tr:g('de.bubenheim'),tl:g('en.transliteration'),ar:g('quran-simple').map((x,i)=>{let r=[];
+  x.trim().split(/\s+/).forEach(t=>{if(ONLYMK.test(t)&&r.length)r[r.length-1]+=t;else r.push(t)});
+  if(i==0&&s!=1&&s!=9&&/^بسم/.test(r[0].replace(MK,'')))r=r.slice(4); /* Bismillah gehört bei API-Text nicht zu Ayah 1 */
+  return r})};T[s].tw=T[s].ar.map((r,i)=>{let t=(T[s].tl[i]||'').trim().split(/\s+/);if(i==0&&t.length==r.length+4)t=t.slice(4);return t.length==r.length?t:null});return 1}catch(e){return 0}}
+/* ===== Blur-Engine: deterministisch, Level-genestet ===== */
+const H=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const hid=(s,a,n,lv)=>new Set([...Array(n).keys()].sort((i,j)=>H(`${s}:${a}:${i}`)-H(`${s}:${a}:${j}`)).slice(0,Math.round(n*lv/100)));
+/* ===== FSRS-4.5 (vereinfacht, Ziel-Retention 90 %) ===== */
+const W=[.5701,1.4436,4.1386,10.9355,5.1443,1.2006,.8627,.0362,1.629,.1342,1.0166,2.1174,.0839,.3204,1.4676,.219,2.8237];
+const cl=(x,a,b)=>Math.min(b,Math.max(a,x)),d0=g=>cl(W[4]-W[5]*(g-3),1,10);
+function sched(c,g,now){let S,Dd,lap=c?c.lap:0;
+ if(!c){S=W[g-1];Dd=d0(g)}else{const r=Math.pow(1+19/81*Math.max(0,now-c.last)/864e5/c.S,-.5);
+  Dd=cl(W[7]*d0(3)+(1-W[7])*(c.D-W[6]*(g-3)),1,10);
+  if(g==1){S=Math.min(c.S,W[11]*Math.pow(Dd,-W[12])*(Math.pow(c.S+1,W[13])-1)*Math.exp(W[14]*(1-r)));lap++}
+  else S=c.S*(1+Math.exp(W[8])*(11-Dd)*Math.pow(c.S,-W[9])*(Math.exp(W[10]*(1-r))-1)*(g==2?W[15]:1)*(g==4?W[16]:1))}
+ S=Math.max(.1,S);const reps=(c?c.reps:0)+1;let ivl=g==1?10/1440:Math.max(1,Math.round(S)); /* bei r=0.9 gilt Intervall = S */
+ if(g>1&&reps<3)ivl=Math.min(ivl,[1,3][reps-1]); /* Lernschritte: erst 1 Tag, dann 3 Tage */
+ return{S,D:Dd,ivl,lap,reps,last:now,due:now+ivl*864e5}}
+const zone=c=>c.ivl<4?0:c.ivl<=30?1:2,ZN=['Neu','Nahe Wiederholung','Ferne Wiederholung'],ZS=['< 4 Tage','4–30 Tage','> 30 Tage'],ZC=['var(--hen)','var(--gold)','var(--em)'];
+/* ===== Helfer ===== */
+const cur=()=>{const k=u.view=='rev'?u.q[u.i]:db.cur.s+':'+db.cur.a,[s,a]=k.split(':').map(Number);return{s,a,k}};
+const go=v=>{if(v=='lib')u.sel=0;u.view=v;render()},iso=d=>d.toISOString().slice(0,10);
+function streak(){let n=0,d=new Date();if(!db.log[iso(d)])d.setDate(d.getDate()-1);while(db.log[iso(d)]){n++;d.setDate(d.getDate()-1)}return n}
+const head=()=>{const v=u.view=='rev'?'home':u.view;return`<header class="text-center pt-4"><div class="flex justify-end"><button class="btn" onclick="db.cfg.dark^=1;save();render()"><i data-lucide="${db.cfg.dark?'sun':'moon'}"></i></button></div><h1 class="ar text-5xl" style="color:var(--em);line-height:1.5">حِفْظ</h1><div class="orn"></div><nav class="flex justify-center gap-2 mt-2 mb-4">${[['home','Heute'],['lib','Suren'],['study','Lernen']].map(x=>`<button class="btn tab ${v==x[0]?'on':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('')}</nav></header>`};
+/* ===== Wörter & Buchstaben ===== */
+const CL=/[^\u064B-\u065F\u0670\u06D6-\u06ED][\u064B-\u065F\u0670\u06D6-\u06ED]*/g,wh=w=>(w.match(CL)||[w]).map(c=>`<i class="L">${c}</i>`).join('');
+function hidden(n,s,a,k){let h=new Set();
+ if(u.view=='rev'){if(!u.rev){const z=zone(db.cards[k]);h=hid(s,a,n,[50,80,100][z]);if(z==2)h.delete(0)}}
+ else if(u.mode=='blur')h=hid(s,a,n,u.blur);
+ else if(u.mode=='loop'&&db.cfg.hp&&L.on&&L.ph=='pause')h=new Set([...Array(n).keys()]);
+ u.rv.forEach(i=>h.delete(i));return h}
+const wt=c=>1+(/\u0651/.test(c)?.8:0)+(c.length==1&&/[اويى]/.test(c)?.6:0)+(/[\u0670\u064B-\u064D]/.test(c)?.5:0),qo=()=>RC.map(r=>`<option value="${r.id}" ${r.id==db.cfg.rid?'selected':''}>${r.n}</option>`).join('');
+function aw(){const e=$('#aw');if(!e)return;const{s,a,k}=cur(),w=T[s].ar[a-1],h=hidden(w.length,s,a,k),tw=db.cfg.tw&&T[s].tw[a-1],cs=w.map(x=>x.match(CL)||[x]);let st=0,c=0;
+ WN=cs.map(x=>x.length);WT=cs.flat().map(x=>c+=wt(x));
+ e.dir='rtl';e.className='flex flex-wrap justify-center';
+ e.innerHTML=w.map((x,i)=>{const r=`<span class="w ${h.has(i)?'bl':''}" data-s="${st}" onclick="rvl(${i})"><b class="ar">${wh(x)}</b>${tw?`<small>${tw[i]}</small>`:''}</span>`;st+=WN[i];return r}).join('');paint();tx()}
+const paint=()=>{document.querySelectorAll('#aw .L').forEach((e,i)=>e.classList.toggle('on',i<lit));document.querySelectorAll('#aw .w small').forEach(e=>e.classList.toggle('on',lit>+e.parentNode.dataset.s))},hl=n=>{if(n!=lit){lit=n;paint()}};
+function tx(){const e=$('#tx');if(!e)return;const{s,a}=cur(),c=db.cfg;
+ e.innerHTML=u.view!='rev'||u.rev?(c.tw&&!T[s].tw[a-1]?`<p class="italic opacity-80 mb-1">${T[s].tl[a-1]}</p>`:'')+(c.tr?`<p>${T[s].tr[a-1]}</p>`:''):''}
+const tg=()=>`<div class="flex gap-5 justify-center mt-4 text-base">${[['tr','Übersetzung'],['tw','Transliteration']].map(x=>`<label><input type=checkbox ${db.cfg[x[0]]?'checked':''} onchange="db.cfg.${x[0]}=+this.checked;save();aw()"> ${x[1]}</label>`).join('')}</div><div id="tx" class="text-center mt-3 px-2"></div>`;
+function rvl(i){u.rv.add(i);aw();setTimeout(()=>{u.rv.delete(i);aw()},2500)}
+/* ===== Audio: Qari-Auswahl, Wort-Timing aus der Quran.com-API, Fallback ohne Timing ===== */
+function say(t,r,fin){const x=new SpeechSynthesisUtterance(t);x.lang='ar-SA';x.rate=r;x.onend=x.onerror=fin;speechSynthesis.cancel();speechSynthesis.speak(x)}
+async function loadRC(){try{const j=await(await fetch('https://api.quran.com/api/v4/resources/recitations')).json();
+ RC=j.recitations.map(r=>({id:r.id,n:r.reciter_name+(r.style?' ('+r.style+')':'')}));try{localStorage.setItem('hifz.rc',JSON.stringify(RC))}catch(e){}
+ const e=$('#qs');if(e)e.innerHTML=qo()}catch(e){}}
+async function getAud(rid,s,a){const k=rid+':'+s+':'+a;if(AC[k])return AC[k];
+ let r={url:`https://everyayah.com/data/Alafasy_128kbps/${String(s).padStart(3,0)}${String(a).padStart(3,0)}.mp3`,seg:null};
+ try{const f=(await(await fetch(`https://api.quran.com/api/v4/recitations/${rid}/by_ayah/${s}:${a}?fields=segments,duration`)).json()).audio_files[0];let x=f.url;
+  if(x){x=x.startsWith('//')?'https:'+x:/^https?:/.test(x)?x:'https://verses.quran.foundation/'+x;r={url:x,seg:(f.segments||[]).map(y=>[y[0],y[y.length-2],y[y.length-1]])}}}catch(e){}
+ return AC[k]=r}
+/* Position (Buchstaben) zur Zeit t in ms: exakt über Wort-Segmente, sonst anteilig nach Buchstaben-Gewicht */
+function litAt(t,seg,dur){const m=WT.length;
+ if(seg&&seg.length){const b=Math.min(...seg.map(x=>x[0])),ok=seg.filter(x=>x[0]-b<WN.length);
+  if(ok.length==WN.length){const pre=[0];WN.forEach((v,i)=>pre.push(pre[i]+v));let n=0;
+   for(const[x,st,en]of ok){if(t<st)break;const j=x-b;n=pre[j]+WN[j]*Math.min(1,(t-st)/Math.max(1,en-st))}return Math.max(0,Math.min(m,Math.ceil(n-1e-6)))}}
+ const f=cl((t-100)/Math.max(300,dur-300),0,1)*WT[m-1];let n=0;while(n<m&&WT[n]-1<f)n++;return n}
+async function playAyah(s,a,done){const my=++gen;hl(0);L.pl=1;L.tts=0;const A=await getAud(db.cfg.rid,s,a);if(my!=gen)return;
+ const t0=performance.now();let ok=0,f=0;L.t0=t0;L.A=A;
+ const fin=()=>{if(ok||my!=gen)return;ok=1;L.pl=0;hl(WT.length);done(performance.now()-t0)},
+ fb=()=>{if(f||ok||my!=gen)return;f=1;L.tts=1;L.t0=performance.now();say(T[s].ar[a-1].join(' '),db.cfg.rate,fin)};
+ au=new Audio(A.url);au.playbackRate=db.cfg.rate;au.onended=fin;au.onerror=fb;au.play().catch(fb);requestAnimationFrame(()=>tick(my))}
+function tick(my){if(!L.pl||my!=gen)return;const m=WT.length,t=L.tts?performance.now()-L.t0:au.currentTime*1000,
+ d=L.tts?m*90/db.cfg.rate:isFinite(au.duration)?au.duration*1000:m*90;hl(litAt(t,L.tts?null:L.A.seg,d));requestAnimationFrame(()=>tick(my))}
+function stopLoop(){clearTimeout(L.tm);L.on=0;L.pl=0;gen++;if(au)au.pause();speechSynthesis.cancel();hl(0)}
+function loopStep(){if(!L.on)return;if(L.i>=db.cfg.rep){stopLoop();return lui()}
+ L.i++;L.ph='play';lui();const{s,a}=cur();
+ playAyah(s,a,ms=>{if(!L.on)return;const p=Math.max(1500,ms*db.cfg.pause);L.ph='pause';L.pm=p;lui();L.tm=setTimeout(loopStep,p)})}
+function toggleLoop(){if(L.on){stopLoop();lui()}else{stopLoop();L={on:1,i:0};loopStep()}}
+function once(){const p=L.pl;stopLoop();if(!p){const{s,a}=cur();playAyah(s,a,()=>{})}}
+function lui(){const e=$('#ls');if(!e)return;aw();
+ e.innerHTML=!L.on?'':L.ph=='play'?`Wiedergabe ${L.i}/${db.cfg.rep}`:`Sprich nach …<div class="h-2 mt-1 rounded" style="background:var(--line)"><div id="pb" class="h-2 rounded" style="background:var(--hen);width:0;transition:width ${L.pm}ms linear"></div></div>`;
+ setTimeout(()=>{const b=$('#pb');if(b)b.style.width='100%'},40);
+ $('#lb').innerHTML=L.on?'<i data-lucide="square"></i> Stopp':'<i data-lucide="play"></i> Abspielen';lucide.createIcons()}
+/* ===== Views ===== */
+function vHome(){const z=[0,1,2].map(()=>({d:0,n:0})),now=Date.now();
+ for(const c of Object.values(db.cards)){const k=zone(c);z[k].n++;if(c.due<=now)z[k].d++}
+ return head()+`<p class="text-center mb-4">Heute: ${db.log[iso(new Date())]||0} Wiederholungen · Serie: ${streak()} Tage</p>
+ <div class="grid grid-cols-3 gap-2">${z.map((x,i)=>`<div class="card text-center p-3" style="border-top:6px solid ${ZC[i]}"><div class="cz text-xs">${ZN[i]}</div><div class="text-xs opacity-70">${ZS[i]}</div><div class="text-4xl my-2">${x.d}</div><div class="text-xs mb-2">fällig · ${x.n} gesamt</div><button class="btn p w-full" ${x.d?'':'disabled'} onclick="startRev(${i})">Wiederholen</button></div>`).join('')}</div>
+ <div class="card arch text-center mt-8 px-6 py-8"><h2 class="mb-2">Weiter lernen</h2><p class="mb-3">${N[db.cur.s-1]} · Ayah ${db.cur.a}</p><button class="btn h" onclick="go('study')">Los geht’s</button></div>`}
+function vLib(){if(!u.sel)return head()+`<div class="grid grid-cols-2 gap-2">${N.map((n,i)=>`<button class="btn text-left" onclick="u.sel=${i+1};render()"><span class="opacity-60">${i+1}.</span> ${n} <span class="text-sm opacity-60">(${CNT[i]})</span></button>`).join('')}</div>`;
+ const s=u.sel;return head()+`<button class="btn mb-3" onclick="u.sel=0;render()">← Alle Suren</button><h2 class="mb-3 text-center">${s}. ${N[s-1]}</h2><div class="flex flex-wrap gap-2">${Array.from({length:CNT[s-1]},(_,i)=>{const c=db.cards[s+':'+(i+1)];return`<button class="btn" style="${c?`border:3px solid ${ZC[zone(c)]}`:''}" onclick="db.cur={s:${s},a:${i+1}};go('study')">${i+1}</button>`}).join('')}</div>`}
+function ctl(){const c=db.cfg,sel=(k,o)=>`<select onchange="db.cfg.${k}=+this.value;save();aw()">${o.map(v=>`<option ${c[k]==v?'selected':''}>${v}</option>`).join('')}</select>`;
+ if(u.mode=='blur')return`<p class="text-center">Verdeckt: <b id="bv">${u.blur}%</b></p><input type=range min=0 max=100 step=5 value="${u.blur}" oninput="u.blur=+this.value;$('#bv').textContent=this.value+'%';aw()"><p class="text-center text-sm">Tippe auf ein verschwommenes Wort für einen kurzen Hinweis.</p>`;
+ return`<p class="text-center mb-2">Qari <select id="qs" onchange="db.cfg.rid=+this.value;save()">${qo()}</select></p><p class="text-center">Wiederholungen ${sel('rep',[1,3,5,10])} · Pause ${sel('pause',[.5,1,1.5,2])}× · Tempo ${sel('rate',[.75,1,1.25])}×</p><p class="text-center mt-2"><label><input type=checkbox ${c.hp?'checked':''} onchange="db.cfg.hp=+this.checked;save()"> Text in der Pause verbergen</label></p>`}
+function vStudy(){const{s,a,k}=cur();
+ return head()+`<div class="flex items-center justify-between"><button class="btn" onclick="nav(-1)"><i data-lucide="chevron-left"></i></button><div class="text-center"><div class="cz">${N[s-1]}</div><div>${s}. Sure · Ayah ${a}/${CNT[s-1]}</div></div><button class="btn" onclick="nav(1)"><i data-lucide="chevron-right"></i></button></div>
+ <div class="arch card my-5 px-4 pt-14 pb-8"><div id="aw"></div></div>
+ <div class="text-center"><button id="lb" class="btn p" onclick="toggleLoop()"></button><div id="ls" class="my-2"></div></div>${tg()}
+ <div class="flex gap-2 justify-center my-4">${[['loop','Hören'],['blur','Blur']].map(m=>`<button class="btn tab ${u.mode==m[0]?'on':''}" onclick="u.mode='${m[0]}';render()">${m[1]}</button>`).join('')}</div>
+ <div class="card p-4 mb-5">${ctl()}</div>
+ <div class="text-center">${db.cards[k]?'<p>✓ Im Wiederholungsplan</p>':'<button class="btn h" onclick="rate(3)">Gelernt ✓</button>'}</div>`}
+function vRev(){if(u.i>=u.q.length)return head()+`<div class="card arch text-center p-10 mt-6"><h2>Fertig</h2><p class="my-3">Alle fälligen Ayat sind wiederholt.</p><button class="btn p" onclick="go('home')">Zurück</button></div>`;
+ const{s,a,k}=cur(),z=zone(db.cards[k]);
+ return head()+`<p class="text-center cz text-xs">${ZN[z]} · ${u.i+1}/${u.q.length}</p><p class="text-center">${N[s-1]} · Ayah ${a}</p>
+ <div class="arch card my-5 px-4 pt-14 pb-8"><div id="aw"></div></div>
+ <div class="text-center mb-4"><button class="btn" onclick="once()"><i data-lucide="play"></i> Hören</button></div>${tg()}
+ <div class="text-center mt-5">${u.rev?`<div class="flex gap-3 justify-center"><button class="btn h" onclick="rate(1)">Nochmal</button><button class="btn p" onclick="rate(3)">Gewusst</button></div>`:`<button class="btn p" onclick="u.rev=1;render()">Aufdecken</button>`}</div>`}
+function nav(d){let{s,a}=db.cur;a+=d;
+ if(a<1){if(s>1){s--;a=CNT[s-1]}else a=1}else if(a>CNT[s-1]){if(s<114){s++;a=1}else a=CNT[s-1]}
+ db.cur={s,a};save();render()}
+function startRev(z){const n=Date.now();u.q=Object.keys(db.cards).filter(k=>zone(db.cards[k])==z&&db.cards[k].due<=n).sort((x,y)=>db.cards[x].due-db.cards[y].due);u.i=0;u.rev=0;u.view='rev';render()}
+function rate(g){const{k}=cur(),d=iso(new Date());db.cards[k]=sched(db.cards[k],g,Date.now());db.log[d]=(db.log[d]||0)+1;save();
+ if(u.view=='rev'){if(g==1)u.q.push(k);u.i++;u.rev=0;render()}else nav(1)}
+function render(){stopLoop();u.rv.clear();document.documentElement.classList.toggle('dark',!!db.cfg.dark);
+ const s=u.view=='study'?db.cur.s:u.view=='rev'&&u.q[u.i]?cur().s:0;
+ if(s&&!T[s]){$('#app').innerHTML=head()+'<p class="text-center my-20">Lade Sure …</p>';lucide.createIcons();
+  load(s).then(ok=>ok?render():($('#app').innerHTML=head()+'<p class="text-center my-16">Text konnte nicht geladen werden (beim ersten Aufruf einer Sure ist Internet nötig).</p><div class="text-center"><button class="btn" onclick="render()">Erneut versuchen</button></div>',lucide.createIcons()));return}
+ $('#app').innerHTML=({home:vHome,lib:vLib,study:vStudy,rev:vRev})[u.view]();aw();if(u.view=='study')lui();lucide.createIcons()}
+/* ===== PWA ===== */
+const ic="data:image/svg+xml,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='#1B4D3E'/><path d='M50 8 62 38 92 50 62 62 50 92 38 62 8 50 38 38Z' fill='none' stroke='#D4AF37' stroke-width='4'/></svg>");
+try{const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify({name:'Hifz',short_name:'Hifz',start_url:location.href,display:'standalone',background_color:'#FBF8F1',theme_color:'#1B4D3E',icons:[{src:ic,sizes:'any',type:'image/svg+xml'}]})],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+loadRC();render();
+</script>
+</body>
+</html>
